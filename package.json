@@ -3,17 +3,21 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "graphql-types": "dotenv -c -- bash -c 'gql-tada generate-schema https://graphql.datocms.com --header \"X-Exclude-Invalid: true\" --header \"Authorization: $DATOCMS_PUBLISHED_CONTENT_TOKEN\"' && gql-tada generate-output && gql-tada turbo"
   },
   "dependencies": {
+    "@datocms/cda-client": "^0.2.2",
     "react": "19.0.0-rc-02c0e824-20241028",
     "react-dom": "19.0.0-rc-02c0e824-20241028",
     "next": "15.0.2"
   },
   "devDependencies": {
+    "dotenv-cli": "^7.4.2",
+    "gql.tada": "^1.8.10",
     "typescript": "^5",
     "@types/node": "^20",
     "@types/react": "^18",
@@ -21,6 +25,7 @@
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "eslint": "^8",
-    "eslint-config-next": "15.0.2"
+    "eslint-config-next": "15.0.2",
+    "prettier": "^3.3.3"
   }
 }
