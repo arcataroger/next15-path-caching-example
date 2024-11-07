@@ -4,8 +4,6 @@ import { typedDatoQueryWithCacheTags } from "@/lib/datocms/typedDatoQueryWithCac
 import { notFound } from "next/navigation";
 import { SlugTreeTableOfContents } from "@/app/components/SlugTreeTableOfContents";
 
-export const dynamic = "force-static";
-
 export async function generateStaticParams() {
   const slugMap = await getSlugToIdMap();
   const allPaths = Object.keys(slugMap).map((slugPath) => ({
@@ -44,7 +42,7 @@ export default async function Page({
 
   const data = await typedDatoQueryWithCacheTags({
     query: pageQuery,
-    cacheTags: [pageId],
+    cacheTags: [`page-${pageId}`],
   });
   const { page } = data;
 
@@ -68,5 +66,3 @@ export default async function Page({
     </>
   );
 }
-
-export const dynamicParams = false;

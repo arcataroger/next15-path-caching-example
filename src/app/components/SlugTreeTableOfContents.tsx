@@ -11,7 +11,7 @@ export const SlugTreeTableOfContents = ({
   slugMap: SlugToIdMap;
 }) => {
   // Build the hierarchy as a nested object
-  const hierarchy:SlugTreeHierarchyLevel = {};
+  const hierarchy: SlugTreeHierarchyLevel = {};
 
   Object.keys(slugMap).forEach((slug) => {
     const parts = slug.split("/");
