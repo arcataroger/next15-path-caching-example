@@ -1,5 +1,5 @@
 import { graphql } from "@/lib/datocms/graphql";
-import { executeTypedQuery } from "@/lib/datocms/executeTypedQuery";
+import { typedDatoQueryWithCacheTags } from "@/lib/datocms/typedDatoQueryWithCacheTags";
 import { Page, SlugToIdMap } from "@/types/types";
 
 // This shared instance of the promise can be re-used across different pages
@@ -42,7 +42,7 @@ export async function getSlugToIdMap(): Promise<SlugToIdMap> {
   console.log(`Calling getSlugToIdMap() #${numberOfTimesCalled}`);
 
   slugToIdMapPromise = (async () => {
-    const data = (await executeTypedQuery(allPagesQuery)) as {
+    const data = (await typedDatoQueryWithCacheTags({query: allPagesQuery, cacheTags: ['slug-tree']})) as {
       allPages: Page[];
     };
 

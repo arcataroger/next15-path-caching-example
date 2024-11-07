@@ -1,6 +1,6 @@
 import { getSlugToIdMap } from "@/lib/datocms/getSlugToIdMap";
 import { graphql } from "@/lib/datocms/graphql";
-import { executeTypedQuery } from "@/lib/datocms/executeTypedQuery";
+import { typedDatoQueryWithCacheTags } from "@/lib/datocms/typedDatoQueryWithCacheTags";
 import { notFound } from "next/navigation";
 import { SlugTreeTableOfContents } from "@/app/components/SlugTreeTableOfContents";
 
@@ -42,7 +42,10 @@ export default async function Page({
             body
         }`);
 
-  const data = await executeTypedQuery(pageQuery);
+  const data = await typedDatoQueryWithCacheTags({
+    query: pageQuery,
+    cacheTags: [pageId],
+  });
   const { page } = data;
 
   if (!page) {
