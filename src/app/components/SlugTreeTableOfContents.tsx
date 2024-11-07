@@ -26,7 +26,7 @@ export const SlugTreeTableOfContents = ({
   });
 
   // Render the nested list recursively
-  const renderList = (items: any, path: string[] = []) => (
+  const renderList = (items: SlugTreeHierarchyLevel, path: string[] = []) => (
     <ul>
       {Object.keys(items).map((key) => {
         const newPath = [...path, key];
