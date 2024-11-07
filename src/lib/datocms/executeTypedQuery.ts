@@ -11,7 +11,6 @@ export async function executeTypedQuery<Result, Variables>(
     query: TadaDocumentNode<Result, Variables>,
     options?: ExecuteQueryOptions<Variables>,
 ) {
-    buildRequestInit;
     const result = await libExecuteQuery(query, {
         variables: options?.variables,
         excludeInvalid: true,

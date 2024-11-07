@@ -1,92 +1,69 @@
-export const dynamic = 'force-static';
-import {graphql} from '@/lib/datocms/graphql'
-import {executeTypedQuery} from "@/lib/datocms/executeTypedQuery";
-import {notFound} from "next/navigation";
+import { getSlugToIdMap } from "@/lib/datocms/getSlugToIdMap";
+import { graphql } from "@/lib/datocms/graphql";
+import { executeTypedQuery } from "@/lib/datocms/executeTypedQuery";
+import { notFound } from "next/navigation";
+import { SlugTreeTableOfContents } from "@/app/components/SlugTreeTableOfContents";
 
-function generatePaths(data) {
-  const getPaths = (page, parentSlugs = []) => {
-    const currentSlugs = [...parentSlugs, page.slug];
-    // Collect the path for the current page
-    const paths = [{ params: { slug: currentSlugs } }];
-
-    // Recursively collect paths from children
-    const childPaths = page.children?.flatMap(child =>
-        getPaths(child, currentSlugs)
-    ) ?? [];
-
-    return [...paths, ...childPaths];
-  };
-
-  // Start collecting paths from the top-level pages
-  return data.allPages.flatMap(page => getPaths(page));
-}
-
-const allPagesQuery = graphql(`
-  query PagesQuery {
-    allPages(
-      first: 100
-      filter: { parent: { exists: false } }
-      orderBy: position_ASC
-    ) {
-      ...PageFragment
-      children {
-        ...PageFragment
-        children {
-          ...PageFragment
-          # And however deep your hierarchy goes
-        }
-      }
-    }
-  }
-
-  fragment PageFragment on PageRecord {
-    position
-    slug
-    id
-    title
-  }
-`);
+export const dynamic = "force-static";
 
 export async function generateStaticParams() {
-  const allPages = await executeTypedQuery(allPagesQuery)
-  return generatePaths(allPages)
+  const slugMap = await getSlugToIdMap();
+  const allPaths = Object.keys(slugMap).map((slugPath) => ({
+    slug: slugPath.split("/"),
+    id: slugMap[slugPath],
+  }));
+
+  return allPaths;
 }
 
 export default async function Page({
-                                     params,
-                                   }: {
-  params: Promise<{ slug: string[] }>;
+  params,
+}: {
+  params: Promise<{ slug: string[]; id: string }>;
 }) {
+  const { slug, id } = await params;
 
-  const {slug} = await params;
+  const slugMap = await getSlugToIdMap();
 
-  const finalSlug = slug.at(-1)
+  const pageId = id ?? slugMap[slug.join("/")];
 
   const pageQuery = graphql(`
-    query PagesQuery {
-      page(filter: {slug: {eq: "${finalSlug}"}}) {
-        ...PageFragment
-      }
-    }
+        query PagesQuery {
+            page(filter: {id: {eq: "${pageId}"}}) {
+                ...PageFragment
+            }
+        }
 
-    fragment PageFragment on PageRecord {
-      position
-      slug
-      id
-      title
-      body
-    }`)
-
+        fragment PageFragment on PageRecord {
+            position
+            slug
+            id
+            title
+            body
+        }`);
 
   const data = await executeTypedQuery(pageQuery);
-  const {page} = data;
+  const { page } = data;
 
   if (!page) {
-    return notFound()
+    return notFound();
   }
 
-  return <div>My Post TEST {JSON.stringify(page, null, 2)}</div>;
-}
+  const { title, body } = page;
 
+  return (
+    <>
+      <h1>{title}</h1>
+      <p>{body}</p>
+      <h2>Navigate to another page</h2>
+      <SlugTreeTableOfContents slugMap={slugMap} />
+      <h2>Debug:</h2>
+      <pre>Params: {JSON.stringify(params, null, 2)}</pre>
+      <pre>pageId: {JSON.stringify(pageId, null, 2)}</pre>
+      <pre>Page: {JSON.stringify(page, null, 2)}</pre>
+      <pre>slugMap: {JSON.stringify(slugMap, null, 2)}</pre>
+    </>
+  );
+}
 
 export const dynamicParams = false;
